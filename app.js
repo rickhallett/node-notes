@@ -9,54 +9,89 @@
 const fs = require('fs');
 const _ = require('lodash');
 const yargs = require('yargs');
+const readline = require('readline');
+const timers = require('timers')
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+  prompt: 'NodeNotes> '
+});
 
 const notes = require('./notes.js')
-const options = {
-  yarg: {
-    title: {
-      describe: 'Title of note',
-      demand: true,
-      alias: 't'
-    },
-    body: {
-      describe: 'Text body of note',
-      demand: true,
-      alias: 'b'
-    }
+
+let displayMenu = () => {
+  console.log(`Your current active file is ${notes.fileName}\n`);
+  console.log(`Please enter one of the following commands: \n"add" to add a new note to ${notes.fileName} \n"read" to read a note \n"list" to list all stored notes in ${notes.fileName} \n"delete" to remove a note \n"change-file" to change the active file\n`);
+}
+
+let takeInput = () => {
+  return rl.prompt();
+}
+
+let navigate = (command, title, body) => {
+  switch (command.trim()) {
+    case 'add':
+      let newNote = notes.addNote(title, body);
+      console.log((!newNote) ? `Note with title:\n${title} already exists. Please try again.` : `Note created. \n`);
+      break;
+    case 'list':
+      let allNotes = notes.getAll();
+      console.log(`Printing ${allNotes.length} note(s).`);
+      allNotes.forEach(note => notes.logNote(note));
+      break;
+    case 'read':
+    debugger;
+      let note = notes.getNote(title);
+      console.log((note) ? notes.logNote(note) : `Note title: "${title}" not found.`);
+      break;
+    case 'delete':
+      let deleted = notes.deleteNote(title);
+      console.log((deleted) ? `Note deleted.` : `Note title: "${title}" not found.`);
+      break;
+    case 'change-file':
+      notes.changeFile(filename);
+      break;
+    case 'exit':
+      console.log('Have a great day!');
+      process.exit(0);
+      break;
+    default:
+      console.log('Command Not Recognised');
+      break;
   }
 }
-const argv = yargs
-  .command('add', 'Add a new note', {
-    title: options.yarg.title,
-    body: options.yarg.body
-  })
-  .command('list', 'List all notes')
-  .command('read', 'Read a note', {
-    title: options.yarg.title
-  })
-  .command('delete', 'Delete a note', {
-    title: options.yarg.title
-  })
-  .help()
-  .argv;
 
-let command = argv._[0]
-console.log(`\nCommand: ${command}\n`);
-// console.log('Yargs:', argv);
+//-------------
+//begin runtime
+//-------------
+console.log('\nWelcome to NodeNotes!');
+displayMenu();
 
-if (command === 'add') {
-  let newNote = notes.addNote(argv.title, argv.body);
-  console.log((!newNote) ? `Note with title:\n${argv.title} already exists. Please try again.` : `Note created. \n`);
-} else if (command === 'list') {
-  let allNotes = notes.getAll();
-  console.log(`Printing ${allNotes.length} note(s).`);
-  allNotes.forEach(note => notes.logNote(note));
-} else if (command === 'read') {
-  let note = notes.getNote(argv.title);
-  console.log((note) ? notes.logNote(note) : `Note title: "${argv.title}" not found.`);
-} else if (command === 'delete') {
-  let deleted = notes.deleteNote(argv.title);
-  console.log((deleted) ? `Note deleted.` : `Note title: "${argv.title}" not found.`);
-} else {
-  console.log('Command Not Recognised');
-}
+let inputData = {};
+
+rl.question('What would you like to do first? ', (firstAnswer) => {
+  inputData.command = firstAnswer;
+  // debugger;
+  if(firstAnswer === 'add') {
+    rl.question('Enter note title: ', (secondAnswer) => {
+      inputData.title = secondAnswer;
+      rl.question('Enter note text: ', (thirdAnswer) => {
+        inputData.body = thirdAnswer;
+      });
+    });
+  }
+  if (firstAnswer === 'read') {
+    rl.question('Enter note title: ', (secondAnswer) => {
+      inputData.title = secondAnswer;
+    
+    });
+  }
+});
+
+rl.on('line', (line) => {
+  navigate(inputData.command, inputData.title, inputData.body);
+  rl.prompt();
+}).on('close', () => {
+  console.log('Have a great day!');
+  process.exit(0);
+});

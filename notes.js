@@ -2,6 +2,8 @@ const fs = require('fs');
 const fileName = 'node-notes.json';
 const emptyJSON = {};
 
+
+
 let fetchNotes = () => {
   //check to see if notes file exists and is valid
   try {
@@ -13,6 +15,10 @@ let fetchNotes = () => {
 
 let saveNotes = (notes) => {
   fs.writeFile(fileName, JSON.stringify(notes), (error) => { console.log(error) });
+}
+
+let changeFile = (filename) => {
+  fileName = filename;
 }
 
 let addNote = (title, body) => {
@@ -66,5 +72,7 @@ module.exports = {
   getAll,
   getNote,
   deleteNote,
-  logNote
+  logNote,
+  changeFile,
+  fileName
 }
