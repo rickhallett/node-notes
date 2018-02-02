@@ -1,5 +1,3 @@
-console.log('notes.js initialised');
-
 const fs = require('fs');
 const fileName = 'node-notes.json';
 const emptyJSON = {};
@@ -14,7 +12,7 @@ let fetchNotes = () => {
 }
 
 let saveNotes = (notes) => {
-    fs.writeFile(fileName, JSON.stringify(notes))
+  fs.writeFile(fileName, JSON.stringify(notes), (error) => { console.log(error) });
 }
 
 let addNote = (title, body) => {
@@ -30,29 +28,43 @@ let addNote = (title, body) => {
     saveNotes(notes);
     return note;
   }
-
-
 };
 
+let logNote = (note) => {
+  console.log(`-----------------------------------\n \nTitle: ${ note.title } \nText: ${ note.body }\n`);
+}
+
 let getAll = () => {
-  console.log(`get notes`);
+  return fetchNotes();
 };
 
 let getNote = (title) => {
-  console.log(`read note`, title);
+  //fetch notes
+  let notes = fetchNotes();
+  //find and print searched note
+  for (const title in notes) {
+    if (notes.hasOwnProperty(title)) {
+      return notes[title];
+    }
+  return false;
+  }
 };
 
 let deleteNote = (title) => {
   //fetch notes
   let notes = fetchNotes();
   //filter notes with note title
+  let filteredNotes = notes.filter(note => note.title !== title)
   //save new notes array
-  saveNotes(notes.filter(note => note.title !== title));
+  saveNotes(filteredNotes);
+  //confirm successfull deletion
+  return filteredNotes < notes ? true : false;
 };
 
 module.exports = {
   addNote, //ES6 equivalent to addNote: addNote
   getAll,
   getNote,
-  deleteNote
+  deleteNote,
+  logNote
 }
