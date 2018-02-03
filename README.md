@@ -5,7 +5,7 @@ To run, in project directory:
 
 Example usage:
 
-Quick-start: `node app.js help`
+Quick-start: `node app.js ---help`
 
 `node app.js command arg1 arg2`
 
